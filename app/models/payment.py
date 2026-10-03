@@ -16,6 +16,6 @@ class Payment(Base):
     method: Mapped[str] = mapped_column(String(20))
     status: Mapped[str] = mapped_column(String(20), default="completed")
     paid_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), sarver_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
     booking: Mapped["Booking"] = relationship()
