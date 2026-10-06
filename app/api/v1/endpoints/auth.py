@@ -3,6 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from app.api.deps import get_current_user
+from app.models.user import User
+from app.schemas.user import UserOut
 
 from app.core.security import create_access_token
 from app.crud import user as crud_user
@@ -25,3 +28,7 @@ def login(
         )
     token = create_access_token(subject=user.email)
     return Token(access_token=token)
+
+@router.get("/me", response_model=UserOut)
+def read_me(current_user: Annotated[User, Depends(get_current_user)]):
+    return current_user
