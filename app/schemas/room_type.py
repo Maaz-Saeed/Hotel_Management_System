@@ -17,5 +17,7 @@ class RoomTypeUpdate(BaseModel):
     description: str | None = Field(default=None, max_length=255)
 
 class RoomTypeOut(RoomTypeBase):
+    id: int
+    
     model_config = ConfigDict(from_attributes=True)
     

@@ -37,7 +37,7 @@ def read_room_type(room_type_id: int, db: DbSession, user: CurrentUser):
 @router.post("", response_model=RoomTypeOut, status_code=status.HTTP_201_CREATED)
 def create_room_type(data: RoomTypeOut, db: DbSession, admin: AdminUser):
     if crud.get_by_name(db, data.name):
-        raise HTTPException(status_code=409, details= "A room type with this name already exists")
+        raise HTTPException(status_code=409, detail= "A room type with this name already exists")
     return crud.create(db, data)
 
 @router.patch("/{room_type_id}", response_model=RoomTypeOut)
