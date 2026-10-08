@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
@@ -10,6 +11,7 @@ from app.db.session import get_db
 from app.models.room import Room
 from app.models.user import User
 from app.schemas.room import RoomCreate, RoomOut, RoomStatus, RoomUpdate
+from app.services import booking_service
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
@@ -34,6 +36,20 @@ def list_rooms(
     floor: int | None = None,
 ):
     return crud.list_all(db, skip, limit, room_status, room_type_id, floor)
+
+@router.get("/available", response_model=list[RoomOut])
+def available_rooms(
+    db: DbSession,
+    user: CurrentUser,
+    check_in: date,
+    check_out: date,
+    room_type_id: int | None = None,
+):
+    if check_in < date.today():
+        raise HTTPException(status_code=422, detail="check_in cannot be in the past")
+    if check_out <= check_in:
+        raise HTTPException(status_code=422, detail="check_out must be after check_in")
+    return booking_service.find_available_rooms(db, check_in, check_out, room_type_id)
 
 @router.get("/{room_id}", response_model=RoomOut)
 def read_room(room_id: int, db: DbSession, user: CurrentUser):
