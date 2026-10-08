@@ -1,11 +1,14 @@
 from datetime import datetime
-from sqlalchemy import String, DateTime, func
+from sqlalchemy import String, DateTime,UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
 
 class Guest(Base):
     __tablename__ = "guests"
+    __table_args__ = (
+        UniqueConstraint("id_type", "id_number", name="uq_guest_id_document"),
+    )
     id: Mapped[int] = mapped_column(primary_key=True)
     full_name: Mapped[str]  = mapped_column(String(100))
     email: Mapped[str | None] = mapped_column(String(255))
