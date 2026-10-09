@@ -91,3 +91,47 @@ def create_booking(db: Session, data: BookingCreate, user: User) -> Booking:
         raise BookingError(409, "This room is already booked for these dates")
     db.refresh(booking)
     return booking
+
+def _get_booking_or_404(db: Session, booking_id: int) -> Booking:
+    booking = db.get(Booking, booking_id)
+    if booking is None:
+        raise BookingError(404, "Booking not found")
+    return booking
+
+
+def check_in(db: Session, booking_id: int) -> Booking:
+    booking = _get_booking_or_404(db, booking_id)
+    if booking.status != "reserved":
+        raise BookingError(
+            409, f"Only reserved bookings can be checked in (current status: {booking.status})"
+        )
+    if date.today() < booking.check_in:
+        raise BookingError(409, "Check-in is not allowed before the check-in date")
+    booking.status = "checked_in"
+    db.commit()
+    db.refresh(booking)
+    return booking
+
+
+def check_out(db: Session, booking_id: int) -> Booking:
+    booking = _get_booking_or_404(db, booking_id)
+    if booking.status != "checked_in":
+        raise BookingError(
+            409, f"Only checked-in bookings can be checked out (current status: {booking.status})"
+        )
+    booking.status = "checked_out"
+    db.commit()
+    db.refresh(booking)
+    return booking
+
+
+def cancel_booking(db: Session, booking_id: int) -> Booking:
+    booking = _get_booking_or_404(db, booking_id)
+    if booking.status != "reserved":
+        raise BookingError(
+            409, f"Only reserved bookings can be cancelled (current status: {booking.status})"
+        )
+    booking.status = "cancelled"
+    db.commit()
+    db.refresh(booking)
+    return booking

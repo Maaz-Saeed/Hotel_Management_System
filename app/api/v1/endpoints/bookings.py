@@ -45,3 +45,24 @@ def read_booking(booking_id: int, db: DbSession, user: CurrentUser):
     if booking is None:
         raise HTTPException(status_code=404, detail="Booking not found")
     return booking
+
+def _run(action, db: Session, booking_id: int):
+    try:
+        return action(db, booking_id)
+    except BookingError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@router.post("/{booking_id}/check-in", response_model=BookingOut)
+def check_in_booking(booking_id: int, db: DbSession, staff: StaffUser):
+    return _run(booking_service.check_in, db, booking_id)
+
+
+@router.post("/{booking_id}/check-out", response_model=BookingOut)
+def check_out_booking(booking_id: int, db: DbSession, staff: StaffUser):
+    return _run(booking_service.check_out, db, booking_id)
+
+
+@router.post("/{booking_id}/cancel", response_model=BookingOut)
+def cancel_booking(booking_id: int, db: DbSession, staff: StaffUser):
+    return _run(booking_service.cancel_booking, db, booking_id)
