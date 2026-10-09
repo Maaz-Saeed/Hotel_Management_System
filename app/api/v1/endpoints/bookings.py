@@ -10,6 +10,8 @@ from app.models.user import User
 from app.schemas.booking import BookingCreate, BookingOut, BookingStatus
 from app.services import booking_service
 from app.services.booking_service import BookingError
+from app.schemas.payment import BalanceOut
+from app.services import billing_service
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
@@ -66,3 +68,10 @@ def check_out_booking(booking_id: int, db: DbSession, staff: StaffUser):
 @router.post("/{booking_id}/cancel", response_model=BookingOut)
 def cancel_booking(booking_id: int, db: DbSession, staff: StaffUser):
     return _run(booking_service.cancel_booking, db, booking_id)
+
+@router.get("/{booking_id}/balance", response_model=BalanceOut)
+def booking_balance(booking_id: int, db: DbSession, user: CurrentUser):
+    booking = crud.get(db, booking_id)
+    if booking is None:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    return billing_service.get_balance(db, booking)

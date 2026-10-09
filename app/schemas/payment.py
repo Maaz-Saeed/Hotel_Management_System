@@ -21,4 +21,10 @@ class PaymentOut(BaseModel):
     paid_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-    
+
+class BalanceOut(BaseModel):
+    booking_id: int
+    total_amount: Decimal
+    total_paid: Decimal
+    balance_due: Decimal
+    payment_status: Literal["unpaid", "partial", "paid"]
