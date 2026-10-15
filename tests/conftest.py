@@ -91,3 +91,63 @@ def auth_headers(client, make_user):
         return {"Authorization": f"Bearer {r.json()['access_token']}"}
 
     return _headers
+
+@pytest.fixture
+def admin_headers(auth_headers):
+    return auth_headers("admin")
+
+
+@pytest.fixture
+def reception_headers(auth_headers):
+    return auth_headers("receptionist")
+
+
+@pytest.fixture
+def manager_headers(auth_headers):
+    return auth_headers("manager")
+
+
+@pytest.fixture
+def room_type(client, admin_headers):
+    r = client.post(
+        "/api/v1/room-types",
+        json={"name": "Single", "base_price": 3000, "capacity": 1},
+        headers=admin_headers,
+    )
+    assert r.status_code == 201, r.text
+    return r.json()
+
+
+@pytest.fixture
+def make_room(client, admin_headers, room_type):
+    def _make(number="101", floor=1, status="available"):
+        r = client.post(
+            "/api/v1/rooms",
+            json={
+                "room_number": number,
+                "floor": floor,
+                "status": status,
+                "room_type_id": room_type["id"],
+            },
+            headers=admin_headers,
+        )
+        assert r.status_code == 201, r.text
+        return r.json()
+
+    return _make
+
+
+@pytest.fixture
+def guest(client, admin_headers):
+    r = client.post(
+        "/api/v1/guests",
+        json={
+            "full_name": "Ali Khan",
+            "phone": "0300-1234567",
+            "id_type": "CNIC",
+            "id_number": "35202-1234567-1",
+        },
+        headers=admin_headers,
+    )
+    assert r.status_code == 201, r.text
+    return r.json()
