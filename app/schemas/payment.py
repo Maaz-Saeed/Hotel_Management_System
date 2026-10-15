@@ -16,7 +16,7 @@ class PaymentOut(BaseModel):
     id: int
     booking_id: int
     amount: Decimal
-    methode: PaymentMethod
+    method: PaymentMethod
     status: PaymentStatus
     paid_at: datetime
 
@@ -28,3 +28,4 @@ class BalanceOut(BaseModel):
     total_paid: Decimal
     balance_due: Decimal
     payment_status: Literal["unpaid", "partial", "paid"]
+    
