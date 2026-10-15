@@ -30,3 +30,23 @@ def list_all(
     if status: 
         stmt = stmt.where(Booking.status == status)
     return list(db.scalars(stmt.offset(skip).limit(limit)).unique().all())
+
+def list_arrivals(db: Session, day) -> list[Booking]:
+    stmt = (
+        _with_relations(select(Booking))
+        .where(Booking.status != "cancelled", Booking.check_in == day)
+        .order_by(Booking.id)
+    )
+    return list(db.scalars(stmt).unique().all())
+
+
+def list_departures(db: Session, day) -> list[Booking]:
+    stmt = (
+        _with_relations(select(Booking))
+        .where(
+            Booking.status.in_(("checked_in", "checked_out")),
+            Booking.check_out == day,
+        )
+        .order_by(Booking.id)
+    )
+    return list(db.scalars(stmt).unique().all())
