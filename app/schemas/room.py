@@ -15,7 +15,7 @@ class RoomCreate(RoomBase):
 class RoomUpdate(BaseModel):
     room_number: str | None = Field(default=None, min_length=1, max_length=10)
     floor: int | None = Field(default=None, ge=0, le=100)
-    staus: RoomStatus | None = None
+    status: RoomStatus | None = None
     room_type_id: int | None = None
 
 class RoomOut(RoomBase):

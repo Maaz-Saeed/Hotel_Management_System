@@ -9,7 +9,7 @@ from app.models.room_type import RoomType
 from app.models.user import User
 from app.schemas.room_type import RoomTypeCreate, RoomTypeOut, RoomTypeUpdate
 
-router = APIRouter(prefix= "/room-type", tags= ["Room Types"])
+router = APIRouter(prefix="/room-types", tags=["Room Types"])
 
 DbSession = Annotated[Session, Depends(get_db)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
@@ -34,10 +34,11 @@ def list_room_types(
 def read_room_type(room_type_id: int, db: DbSession, user: CurrentUser):
     return get_or_404(db, room_type_id)
 
+
 @router.post("", response_model=RoomTypeOut, status_code=status.HTTP_201_CREATED)
-def create_room_type(data: RoomTypeOut, db: DbSession, admin: AdminUser):
+def create_room_type(data: RoomTypeCreate, db: DbSession, admin: AdminUser):
     if crud.get_by_name(db, data.name):
-        raise HTTPException(status_code=409, detail= "A room type with this name already exists")
+        raise HTTPException(status_code=409, detail="A room type with this name already exists")
     return crud.create(db, data)
 
 @router.patch("/{room_type_id}", response_model=RoomTypeOut)

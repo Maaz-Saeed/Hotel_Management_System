@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from app.db.session import SessionLocal
+from app.db.session import Sessionlocal
 from app.models.booking import Booking
 from app.models.user import User
 from tests.utils import day
@@ -163,7 +163,7 @@ def test_database_blocks_overlap_even_without_the_code_check(
 ):
     room = make_room("101")
     assert book(client, admin_headers, guest, room, 10, 13).status_code == 201
-    with SessionLocal() as db:
+    with Sessionlocal() as db:
         user_id = db.scalar(select(User.id))
         db.add(
             Booking(
@@ -178,4 +178,3 @@ def test_database_blocks_overlap_even_without_the_code_check(
         )
         with pytest.raises(IntegrityError):
             db.commit()
-            

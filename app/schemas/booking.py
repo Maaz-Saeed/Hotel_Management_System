@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from app.schemas.guest import GuestOut
 from app.schemas.room import RoomOut
 
-BookingStatus = Literal["reserved", "checked_in", "checked_out", "canceled"]
+BookingStatus = Literal["reserved", "checked_in", "checked_out", "cancelled"]
 
 class BookingCreate(BaseModel):
     guest_id: int
