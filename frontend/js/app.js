@@ -1,7 +1,8 @@
 // Login, navigation and routing.
 const App = {
   user: null,
-  nav: [["dashboard", "Dashboard"], ["rooms", "Rooms"], ["guests", "Guests"], ["bookings", "Bookings"]],
+  nav: [["dashboard", "Dashboard", "home"], ["bookings", "Bookings", "calendar"], ["rooms", "Rooms", "bed"], ["guests", "Guests", "users"],
+    ["room-types", "Room types", "tag", "admin"], ["staff", "Staff", "shield", "admin"]],
 
   async init() {
     $("#mclose").onclick = UI.closeModal;
@@ -25,8 +26,8 @@ const App = {
   start() {
     $("#login").classList.add("hidden");
     $("#shell").classList.remove("hidden");
-    $("#who").innerHTML = `<b>${UI.esc(App.user.full_name)}</b><br><span class="mut" style="color:#a5b4fc">${UI.esc(App.user.role)}</span>`;
-    $("#nav").innerHTML = App.nav.map(([k, l]) => `<a href="#/${k}" data-k="${k}">${l}</a>`).join("");
+    $("#who").innerHTML = `<b>${UI.esc(App.user.full_name)}</b><br><small>${UI.esc(App.user.role)}</small>`;
+    $("#nav").innerHTML = App.nav.filter(n => !n[3] || n[3] === App.user.role).map(([k, l, i]) => `<a href="#/${k}" data-k="${k}">${UI.icon(i)}${l}</a>`).join("");
     window.onhashchange = App.route;
     App.route();
   },
@@ -36,6 +37,7 @@ const App = {
     const view = Views[key] || Views.dashboard;
     document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.k === (Views[key] ? key : "dashboard")));
     $("#title").textContent = view.title;
+    $("#sub").textContent = new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
     $("#bar").innerHTML = "";
     $("#view").onclick = null;
     $("#view").innerHTML = `<p class="mut">Loading…</p>`;

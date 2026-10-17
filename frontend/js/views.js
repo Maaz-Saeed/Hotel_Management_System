@@ -1,7 +1,8 @@
 // One object per page. Each has a title and render(container, headerBar).
 const Views = {};
 
-const stat = (t, v, s = "") => `<div class="stat"><span>${t}</span><b>${v}</b><small>${s}</small></div>`;
+const stat = (t, val, s = "", icon = "home", tone = "ind") =>
+  `<div class="stat"><div class="ico t-${tone}">${UI.icon(icon)}</div><div><span>${t}</span><b>${val}</b><small>${s}</small></div></div>`;
 
 function bookingList(items) {
   if (!items.length) return UI.empty("Nobody today");
@@ -20,14 +21,20 @@ Views.dashboard = {
     if (UI.can("admin", "manager")) {
       const end = UI.today();
       const r = await API.get("/reports/revenue", { start_date: UI.addDays(end, -6), end_date: end });
-      revenue = stat("Revenue (7 days)", UI.money(r.total_revenue), `${r.payments_count} payments`);
+      revenue = stat("Revenue (7 days)", UI.money(r.total_revenue), `${r.payments_count} payments`, "cash", "amb");
     }
+    const hr = new Date().getHours();
+    const greet = hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
     el.innerHTML = `
+      <div class="banner"><div><h2>${greet}, ${UI.esc(App.user.full_name.split(" ")[0])} 👋</h2>
+        <p>${arrivals.length} arrival(s) and ${departures.length} departure(s) today.</p></div>
+        <div><a class="btn" href="#/bookings">Bookings</a><a class="btn" href="#/guests">Guests</a></div></div>
       <div class="stats">
-        ${stat("Occupancy today", occ.occupancy_rate + "%", `${occ.occupied_rooms} of ${occ.bookable_rooms} rooms`)}
-        ${stat("Available rooms", occ.available_rooms, `${occ.maintenance_rooms} in maintenance`)}
-        ${stat("Arrivals today", arrivals.length)}
-        ${stat("Departures today", departures.length)}
+        <div class="stat"><div class="ring" style="--p:${Number(occ.occupancy_rate)}"><i>${Number(occ.occupancy_rate)}%</i></div>
+          <div><span>Occupancy today</span><b>${occ.occupied_rooms}/${occ.bookable_rooms}</b><small>rooms occupied</small></div></div>
+        ${stat("Available rooms", occ.available_rooms, `${occ.maintenance_rooms} in maintenance`, "bed", "grn")}
+        ${stat("Arrivals today", arrivals.length, "guests arriving", "door", "ind")}
+        ${stat("Departures today", departures.length, "guests leaving", "calendar", "pnk")}
         ${revenue}
       </div>
       <div class="grid2">
