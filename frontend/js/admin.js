@@ -6,7 +6,7 @@ Views["room-types"] = {
     const load = async () => {
       types = await API.get("/room-types");
       el.innerHTML = `<div class="card">${types.length ? UI.table(["Name", "Price / night", "Capacity", "Description", ""], types.map(t =>
-        `<tr><td><b>${UI.esc(t.name)}</b></td><td>${UI.money(t.base_price)}</td><td>${t.capacity} guest(s)</td><td>${UI.esc(t.description || "-")}</td>
+        `<tr><td>${t.image_url ? `<img src="${UI.esc(t.image_url)}" alt="" width="48" height="36" style="object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:10px" onerror="this.remove()">` : ""}<b>${UI.esc(t.name)}</b></td><td>${UI.money(t.base_price)}</td><td>${t.capacity} guest(s)</td><td>${UI.esc(t.description || "-")}</td>
          <td class="acts"><button class="btn ghost sm" data-edit="${t.id}">Edit</button><button class="btn bad sm" data-del="${t.id}">Delete</button></td></tr>`).join("")) : UI.empty("No room types yet")}</div>`;
     };
     el.onclick = e => {
@@ -27,16 +27,21 @@ function typeForm(t, done) {
     <div class="row"><div><label>Price per night (PKR)</label><input name="base_price" type="number" step="0.01" min="1" value="${UI.esc(v.base_price)}" required></div>
     <div><label>Capacity</label><input name="capacity" type="number" min="1" max="10" value="${v.capacity}" required></div></div>
     <label>Description (optional)</label><input name="description" value="${UI.esc(v.description || "")}">
-    <label>Photo link (optional)</label><input name="image_url" value="${UI.esc(v.image_url || "")}" placeholder="https://...">
+    <label>Room photo (JPG, PNG or WebP, up to 3 MB)</label>
+    ${v.image_url ? `<img src="${UI.esc(v.image_url)}" alt="" style="width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin-bottom:8px" onerror="this.remove()">` : ""}
+    <input name="file" type="file" accept="image/png,image/jpeg,image/webp">
+    <label>Or paste a photo link (optional)</label><input name="image_url" value="${UI.esc(v.image_url || "")}" placeholder="https://...">
     <label>Amenities, separated by commas (optional)</label><input name="amenities" value="${UI.esc(v.amenities || "")}" placeholder="WiFi, Air conditioning, Smart TV">
     <button class="btn full">Save</button></form>`, m => {
     m.querySelector("#f").onsubmit = e => {
       e.preventDefault();
-      const f = e.target;
+      const f = e.target, file = f.file.files[0];
+      if (file && file.size > 3 * 1024 * 1024) return UI.toast("Image must be 3 MB or smaller", "bad");
       const body = { name: f.name.value, base_price: f.base_price.value, capacity: +f.capacity.value,
         description: f.description.value || null, image_url: f.image_url.value || null, amenities: f.amenities.value || null };
       UI.run(async () => {
-        await (t ? API.patch("/room-types/" + t.id, body) : API.post("/room-types", body));
+        const saved = await (t ? API.patch("/room-types/" + t.id, body) : API.post("/room-types", body));
+        if (file) { const fd = new FormData(); fd.append("file", file); await API.upload(`/room-types/${saved.id}/image`, fd); }
         UI.closeModal(); UI.toast("Room type saved"); done();
       });
     };

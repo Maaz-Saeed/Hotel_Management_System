@@ -129,11 +129,15 @@ Views.bookings = {
   title: "Bookings",
   async render(el, bar) {
     el.innerHTML = `<div class="card"><div class="filters"><select id="fs"><option value="">All statuses</option>
-      <option>reserved</option><option>checked_in</option><option>checked_out</option><option>cancelled</option></select></div><div id="tbl"></div></div>`;
+      <option>reserved</option><option>checked_in</option><option>checked_out</option><option>cancelled</option></select>
+      <input id="fy" type="number" min="2000" max="2100" placeholder="Year" style="max-width:110px">
+      <select id="fm" style="max-width:130px"><option value="">Month</option>${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => `<option value="${i + 1}">${m}</option>`).join("")}</select>
+      <input id="fd" type="number" min="1" max="31" placeholder="Day" style="max-width:90px">
+      <button class="btn ghost sm" id="fx">Clear</button></div><p class="hint" id="sum2"></p><div id="tbl"></div></div>`;
     const staff = UI.can("admin", "receptionist");
 
     const load = async () => {
-      const list = await API.get("/bookings", { status: $("#fs").value, limit: 100 });
+      const list = await API.get("/bookings", { status: $("#fs").value, year: $("#fy").value, month: $("#fm").value, day: $("#fd").value, limit: 100 });
       $("#tbl").innerHTML = list.length ? UI.table(["#", "Guest", "Room", "Dates", "Total", "Status", ""], list.map(b => {
         const acts = !staff ? "" : [
           b.status === "reserved" ? `<button class="btn ok sm" data-act="check-in" data-id="${b.id}">Check-in</button>` : "",
@@ -143,10 +147,12 @@ Views.bookings = {
         return `<tr><td>${b.id}</td><td>${UI.esc(b.guest.full_name)}</td><td>${UI.esc(b.room.room_number)}</td>
           <td>${b.check_in} → ${b.check_out}</td><td>${UI.money(b.total_amount)}</td><td>${UI.badge(b.status)}</td>
           <td class="acts">${acts}<button class="btn ghost sm" data-pay="${b.id}">Payments</button></td></tr>`;
-      }).join("")) : UI.empty("No bookings yet");
+      }).join("")) : UI.empty("No bookings found");
+      $("#sum2").textContent = !list.length ? "" : $("#fd").value ? "Rooms booked that day: " + [...new Set(list.map(b => b.room.room_number))].join(", ") : list.length + " booking(s) found";
     };
 
-    $("#fs").onchange = load;
+    ["#fs", "#fy", "#fm", "#fd"].forEach(s => $(s).onchange = () => UI.run(load));
+    $("#fx").onclick = () => { ["#fs", "#fy", "#fm", "#fd"].forEach(s => $(s).value = ""); UI.run(load); };
     el.onclick = e => {
       const a = e.target.closest("[data-act]"), p = e.target.closest("[data-pay]");
       if (a) UI.run(async () => { await API.request(`/bookings/${a.dataset.id}/${a.dataset.act}`, { method: "POST" }); UI.toast("Booking updated"); load(); });

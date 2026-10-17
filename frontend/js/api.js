@@ -11,7 +11,7 @@ const API = {
   base: "/api/v1",
   token: () => localStorage.getItem("token"),
 
-  async request(path, { method = "GET", body, form, params } = {}) {
+  async request(path, { method = "GET", body, form, params, raw } = {}) {
     const url = new URL(API.base + path, location.origin);
     Object.entries(params || {}).forEach(([k, v]) => {
       if (v !== "" && v != null) url.searchParams.set(k, v);
@@ -19,7 +19,8 @@ const API = {
     const headers = {};
     if (API.token()) headers.Authorization = "Bearer " + API.token();
     let payload;
-    if (form) payload = new URLSearchParams(form);
+    if (raw) payload = raw;
+    else if (form) payload = new URLSearchParams(form);
     else if (body) { headers["Content-Type"] = "application/json"; payload = JSON.stringify(body); }
 
     const res = await fetch(url, { method, headers, body: payload });
@@ -36,6 +37,7 @@ const API = {
   get: (path, params) => API.request(path, { params }),
   post: (path, body) => API.request(path, { method: "POST", body }),
   patch: (path, body) => API.request(path, { method: "PATCH", body }),
+  upload: (path, raw) => API.request(path, { method: "POST", raw }),
 
   async login(email, password) {
     const data = await API.request("/auth/login", { method: "POST", form: { username: email, password } });

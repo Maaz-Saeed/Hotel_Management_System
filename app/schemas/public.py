@@ -1,5 +1,8 @@
 from datetime import date
-from pydantic import BaseModel, ConfigDict, Field, model_validator, EmailStr
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+
+PHONE = r"^\+?[0-9\- ]{7,20}$"
 
 
 class PublicRoomType(BaseModel):
@@ -20,9 +23,6 @@ class OnlineBookingIn(BaseModel):
     room_type_id: int
     check_in: date
     check_out: date
-    full_name: str = Field(min_length=2, max_length=100)
-    email: EmailStr
-    phone: str = Field(pattern=r"^\+?[0-9\- ]{7,20}$")
 
     @model_validator(mode="after")
     def check_dates(self):
@@ -41,3 +41,29 @@ class OnlineBookingOut(BaseModel):
     check_in: date
     check_out: date
     total_amount: float
+
+
+class CustomerRegister(BaseModel):
+    full_name: str = Field(min_length=2, max_length=100)
+    email: EmailStr
+    phone: str = Field(pattern=PHONE)
+    password: str = Field(min_length=8, max_length=72)
+
+
+class CustomerLogin(BaseModel):
+    email: EmailStr
+    password: str = Field(max_length=72)
+
+
+class CustomerOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    full_name: str
+    email: str
+    phone: str
+
+
+class CustomerToken(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    customer: CustomerOut

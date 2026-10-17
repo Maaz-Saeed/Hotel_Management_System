@@ -1,35 +1,69 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Grand Hotel | Book your stay</title>
+<meta name="description" content="Book a room at Grand Hotel online. Best rate, free cancellation, pay at the hotel.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css"></head>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+</head>
 <body>
-<header id="nav"><a class="logo" href="#top">Grand Hotel</a>
-<nav><a href="#rooms">Rooms</a><a href="#why">Why book direct</a><a href="#manage">Find my booking</a><a class="btn sm" href="/app/">Staff login</a></nav></header>
-<section class="hero" id="top"><div>
-<h1>Quiet rooms. Easy booking.</h1>
-<p>Pick your dates, choose a room and get your confirmation code in under a minute. Pay when you arrive.</p>
-<form class="search" id="search">
-<label>Check-in<input type="date" id="ci" required></label>
-<label>Check-out<input type="date" id="co" required></label>
-<button class="btn">Check availability</button></form></div></section>
+<a class="skip" href="#rooms">Skip to rooms</a>
+<header id="nav">
+  <a class="logo" href="#top">Grand Hotel</a>
+  <nav aria-label="Main"><a href="#rooms">Rooms</a><a href="#why">Why book direct</a><a href="#manage">Find my booking</a><span id="acct"></span><a href="/app/">Staff</a></nav>
+</header>
+
+<section class="hero" id="top">
+  <div>
+    <h1>Quiet rooms. Easy booking.</h1>
+    <p>Pick your dates, choose a room and get your booking code in under a minute. Pay when you arrive.</p>
+    <form class="search" id="search">
+      <label>Check-in<input type="date" id="ci" required></label>
+      <label>Check-out<input type="date" id="co" required></label>
+      <button class="btn">Check availability</button>
+    </form>
+    <p class="err" id="serr" role="alert"></p>
+  </div>
+</section>
+
 <main>
-<section id="rooms" class="wrap"><h2>Our rooms</h2><p class="sub" id="rooms-sub">Choose dates above to see which rooms are free.</p><div class="grid" id="rooms-grid"></div></section>
-<section id="why" class="wrap feats">
-<div><h3>Best rate, no fees</h3><p>The price you see is the price you pay.</p></div>
-<div><h3>Free cancellation</h3><p>Cancel online any time before check-in.</p></div>
-<div><h3>Instant confirmation</h3><p>Your booking code appears right away.</p></div>
-<div><h3>Pay at the hotel</h3><p>No card needed to reserve.</p></div></section>
-<section class="gallery">
-<img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80" alt="Hotel exterior" onerror="this.remove()">
-<img src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80" alt="Pool" onerror="this.remove()">
-<img src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80" alt="Lobby" onerror="this.remove()"></section>
-<section id="manage" class="wrap narrow"><h2>Find my booking</h2><p class="sub">Enter the code from your confirmation and the email you booked with.</p>
-<form id="mf"><label>Booking code<input name="ref" placeholder="HMS-1A2B3C" required></label><label>Email<input type="email" name="email" required></label><button class="btn">Find booking</button></form>
-<div id="found"></div></section>
+  <section id="rooms" class="wrap">
+    <h2>Our rooms</h2>
+    <p class="sub" id="rooms-sub" aria-live="polite">Choose your dates above to see which rooms are free.</p>
+    <div class="grid" id="rooms-grid"></div>
+  </section>
+
+  <section id="why" class="feats">
+    <div><h3>Best rate, no fees</h3><p>The price you see is the price you pay.</p></div>
+    <div><h3>Free cancellation</h3><p>Cancel online any time before check-in.</p></div>
+    <div><h3>Instant confirmation</h3><p>Your booking code appears right away.</p></div>
+    <div><h3>Pay at the hotel</h3><p>No card needed to reserve a room.</p></div>
+  </section>
+
+  <section class="gallery" aria-label="Photo gallery">
+    <img loading="lazy" alt="Hotel exterior" src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80">
+    <img loading="lazy" alt="Hotel pool" src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80">
+    <img loading="lazy" alt="Hotel lobby" src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80">
+  </section>
+
+  <section id="manage" class="wrap narrow">
+    <h2>Find my booking</h2>
+    <p class="sub">Enter the code from your confirmation and the email you booked with.</p>
+    <form id="mf">
+      <label>Booking code<input name="ref" placeholder="HMS-1A2B3C" required autocomplete="off"></label>
+      <label>Email<input type="email" name="email" required></label>
+      <button class="btn">Find booking</button>
+    </form>
+    <div id="found" aria-live="polite"></div>
+  </section>
 </main>
-<footer>Grand Hotel · Reception open 24 hours</footer>
-<div class="modal" id="modal"><div class="box" id="box"></div></div>
-<script src="js/site.js"></script></body></html>
+
+<footer>Grand Hotel · Reception open 24 hours · Pay at the hotel in PKR</footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Booking"><div class="box" id="box"></div></div>
+<script src="js/site.js"></script>
+</body>
+</html>

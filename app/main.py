@@ -12,6 +12,7 @@ from sqlalchemy import text
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.db.session import engine
+from app.core.uploads import UPLOAD_ROOT
 
 logging.basicConfig(
     level=logging.INFO,
@@ -65,5 +66,6 @@ def health_db():
 
 WEBSITE_DIR = Path(__file__).resolve().parents[1] / "website"
 if WEBSITE_DIR.exists():
+    app.mount("/uploads", StaticFiles(directory=UPLOAD_ROOT), name="uploads")
     app.mount("/", StaticFiles(directory=WEBSITE_DIR, html=True), name="website")
     
