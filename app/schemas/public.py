@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, EmailStr
 
 
 class PublicRoomType(BaseModel):
@@ -21,8 +21,8 @@ class OnlineBookingIn(BaseModel):
     check_in: date
     check_out: date
     full_name: str = Field(min_length=2, max_length=100)
-    email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-    phone: str = Field(min_length=6, max_length=30)
+    email: EmailStr
+    phone: str = Field(pattern=r"^\+?[0-9\- ]{7,20}$")
 
     @model_validator(mode="after")
     def check_dates(self):
@@ -41,4 +41,3 @@ class OnlineBookingOut(BaseModel):
     check_in: date
     check_out: date
     total_amount: float
-    

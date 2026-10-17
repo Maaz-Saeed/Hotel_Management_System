@@ -29,7 +29,7 @@ class BookingOut(BaseModel):
     check_out: date
     status: BookingStatus
     total_amount: Decimal
-    created_by: int
+    created_by: int | None = None
     created_at: datetime
     guest: GuestOut
     room: RoomOut

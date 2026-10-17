@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import public
 from app.api.v1.endpoints import (
     auth,
     bookings,
@@ -9,6 +8,7 @@ from app.api.v1.endpoints import (
     room_types,
     rooms,
     users,
+    public,
 )
 
 api_router = APIRouter()

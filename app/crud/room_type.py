@@ -23,7 +23,7 @@ def create(db: Session, data: RoomTypeCreate) -> RoomType:
 
 def update(db: Session, room_type: RoomType, data: RoomTypeUpdate) -> RoomType:
     for field, value in data.model_dump(exclude_unset=True).items():
-        if value is None and field != "description":
+        if value is None and field not in ("description", "image_url", "amenities"):
             continue
         setattr(room_type, field, value)
     db.commit()

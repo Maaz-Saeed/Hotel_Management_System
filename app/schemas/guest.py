@@ -25,6 +25,8 @@ class GuestUpdate(BaseModel):
 
 class GuestOut(GuestBase):
     id: int
+    id_type: IdType | None = None
+    id_number: str | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
