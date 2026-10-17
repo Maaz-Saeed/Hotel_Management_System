@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grand Hotel | Management</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="login" class="login hidden">
+    <form id="lf">
+      <div class="logo">🏨</div>
+      <h2>Grand Hotel</h2>
+      <p class="mut">Sign in to the management system</p>
+      <label>Email</label><input name="email" type="email" required autofocus>
+      <label>Password</label><input name="password" type="password" required>
+      <div id="lerr" class="err"></div>
+      <button class="btn full">Sign in</button>
+    </form>
+  </div>
+
+  <div id="shell" class="shell hidden">
+    <aside class="side">
+      <div class="brand">🏨 <span>Grand Hotel</span></div>
+      <nav id="nav"></nav>
+      <div class="user"><div id="who"></div><button id="logout" class="btn ghost sm">Sign out</button></div>
+    </aside>
+    <main>
+      <header><h1 id="title"></h1><div id="bar"></div></header>
+      <section id="view"></section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="box"><div class="mh"><h3 id="mtitle"></h3><button id="mclose" class="x" aria-label="Close">×</button></div><div id="mbody"></div></div>
+  </div>
+  <div id="toasts"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/views.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
