@@ -21,17 +21,20 @@ Views["room-types"] = {
 };
 
 function typeForm(t, done) {
-  const v = t || { name: "", base_price: "", capacity: 1, description: "" };
+  const v = t || { name: "", base_price: "", capacity: 1, description: "", image_url: "", amenities: "" };
   UI.modal(t ? "Edit room type" : "Add room type", `<form id="f">
     <label>Name</label><input name="name" value="${UI.esc(v.name)}" required minlength="2">
-    <div class="row"><div><label>Price per night (Rs)</label><input name="base_price" type="number" step="0.01" min="1" value="${UI.esc(v.base_price)}" required></div>
+    <div class="row"><div><label>Price per night (PKR)</label><input name="base_price" type="number" step="0.01" min="1" value="${UI.esc(v.base_price)}" required></div>
     <div><label>Capacity</label><input name="capacity" type="number" min="1" max="10" value="${v.capacity}" required></div></div>
     <label>Description (optional)</label><input name="description" value="${UI.esc(v.description || "")}">
+    <label>Photo link (optional)</label><input name="image_url" value="${UI.esc(v.image_url || "")}" placeholder="https://...">
+    <label>Amenities, separated by commas (optional)</label><input name="amenities" value="${UI.esc(v.amenities || "")}" placeholder="WiFi, Air conditioning, Smart TV">
     <button class="btn full">Save</button></form>`, m => {
     m.querySelector("#f").onsubmit = e => {
       e.preventDefault();
       const f = e.target;
-      const body = { name: f.name.value, base_price: f.base_price.value, capacity: +f.capacity.value, description: f.description.value || null };
+      const body = { name: f.name.value, base_price: f.base_price.value, capacity: +f.capacity.value,
+        description: f.description.value || null, image_url: f.image_url.value || null, amenities: f.amenities.value || null };
       UI.run(async () => {
         await (t ? API.patch("/room-types/" + t.id, body) : API.post("/room-types", body));
         UI.closeModal(); UI.toast("Room type saved"); done();

@@ -3,30 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Grand Hotel | Management</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Grand Hotel | Staff</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
   <div id="login" class="login hidden">
-    <form id="lf">
-      <div class="logo">🏨</div>
-      <h2>Grand Hotel</h2>
-      <p class="mut">Sign in to the management system</p>
+    <div class="hero"><div class="logo">Grand Hotel</div><h1>Everything for today's guests</h1>
+      <p>Rooms, guests, bookings and payments in one place.</p>
+      <ul><li>Live room availability</li><li>Double-booking protection</li><li>Daily arrivals and departures</li></ul></div>
+    <div class="lform"><form id="lf"><h2>Staff sign in</h2><p class="mut">Use the email and password given by your manager.</p>
       <label>Email</label><input name="email" type="email" required autofocus>
       <label>Password</label><input name="password" type="password" required>
-      <div id="lerr" class="err"></div>
-      <button class="btn full">Sign in</button>
-    </form>
+      <div id="lerr" class="err" role="alert"></div><button class="btn full">Sign in</button>
+      <a class="back" href="/">Go to the guest booking website</a></form></div>
   </div>
 
   <div id="shell" class="shell hidden">
     <aside class="side">
-      <div class="brand">🏨 <span>Grand Hotel</span></div>
-      <nav id="nav"></nav>
+      <div class="brand">Grand Hotel</div>
+      <nav id="nav" aria-label="Main"></nav>
       <div class="user"><div id="who"></div><button id="logout" class="btn ghost sm">Sign out</button></div>
     </aside>
     <main>
-      <header><h1 id="title"></h1><div id="bar"></div></header>
+      <header><div><h1 id="title"></h1><p id="sub" class="mut"></p></div><div id="bar"></div></header>
       <section id="view"></section>
     </main>
   </div>
@@ -36,9 +37,10 @@
   </div>
   <div id="toasts"></div>
 
-  <script src="js/api.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/views.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/api.js?v=3"></script>
+  <script src="js/ui.js?v=3"></script>
+  <script src="js/views.js?v=3"></script>
+  <script src="js/admin.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
 </body>
 </html>
