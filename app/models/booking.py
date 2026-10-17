@@ -13,7 +13,7 @@ class Booking(Base):
 
     guest_id: Mapped[int] = mapped_column(ForeignKey("guests.id"))
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
-    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     check_in: Mapped[date] = mapped_column(Date)
     check_out: Mapped[date] = mapped_column(Date)
@@ -25,3 +25,6 @@ class Booking(Base):
     guest: Mapped["Guest"] = relationship()
     room: Mapped["Room"] = relationship()
     created_by_user: Mapped["User"] = relationship()
+
+    reference: Mapped[str | None] = mapped_column(String(12), unique=True, index=True)
+    source: Mapped[str] = mapped_column(String(10), default="staff", server_default="staff")

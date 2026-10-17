@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-
+from app.api.v1.endpoints import public
 from app.api.v1.endpoints import (
     auth,
     bookings,
@@ -20,3 +20,4 @@ api_router.include_router(guests.router)
 api_router.include_router(bookings.router)
 api_router.include_router(payments.router)
 api_router.include_router(reports.router)
+api_router.include_router(public.router)

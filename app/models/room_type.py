@@ -12,4 +12,5 @@ class RoomType(Base):
     capacity: Mapped[int] = mapped_column(default=1)
     description: Mapped[str | None] = mapped_column(String(255))
     rooms: Mapped[list["Room"]] = relationship(back_populates="room_type") 
-    
+    image_url: Mapped[str | None] = mapped_column(String(500))
+    amenities: Mapped[str | None] = mapped_column(String(300)) 

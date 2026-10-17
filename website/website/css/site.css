@@ -1,0 +1,42 @@
+:root{--ink:#10262b;--sea:#1f6f78;--sea-d:#17555c;--mist:#eef3f2;--bg:#fbfcfc;--muted:#5d6e72;--line:#dbe4e3}
+*{box-sizing:border-box;margin:0}
+body{font:16px/1.6 "DM Sans",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+h1,h2,h3,.logo{font-family:Fraunces,Georgia,serif;line-height:1.15}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid #e9a23b;outline-offset:2px}
+header{position:fixed;inset:0 0 auto;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:16px 5%;color:#fff;transition:background .3s,padding .3s}
+header.solid{background:var(--ink);padding:10px 5%}
+.logo{font-size:24px;font-weight:700}
+nav{display:flex;gap:24px;align-items:center;font-size:15px}
+.btn{background:var(--sea);color:#fff;border:0;padding:12px 22px;border-radius:6px;font:700 15px "DM Sans";cursor:pointer;transition:background .2s}
+.btn:hover{background:var(--sea-d)}.btn:disabled{background:#b8c4c3;cursor:not-allowed}.btn.sm{padding:8px 16px}.btn.full{width:100%;margin-top:6px}
+header .btn{background:#fff;color:var(--ink)}
+.hero{min-height:90vh;display:flex;align-items:flex-end;color:#fff;padding:120px 5% 64px;background:linear-gradient(180deg,#10262b55,#10262bd9),url("https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=80") center/cover,var(--ink)}
+.hero h1{font-size:clamp(42px,7vw,84px);max-width:11ch}
+.hero p{max-width:480px;margin:16px 0 28px;font-size:18px}
+.search{display:flex;gap:12px;flex-wrap:wrap;align-items:end;background:#fff;color:var(--ink);padding:16px;border-radius:10px;max-width:640px}
+label{display:grid;gap:4px;font-size:13px;font-weight:700;color:var(--muted);flex:1;min-width:150px}
+input{padding:11px 12px;border:1px solid var(--line);border-radius:6px;font:16px "DM Sans";color:var(--ink);width:100%;background:#fff}
+.wrap{max-width:1180px;margin:auto;padding:84px 5%}.narrow{max-width:640px}
+h2{font-size:38px}.sub{color:var(--muted);margin:8px 0 32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:28px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.img{height:220px;background:linear-gradient(135deg,var(--ink),var(--sea))}.img img{width:100%;height:100%;object-fit:cover;display:block}
+.body{padding:20px;display:flex;flex-direction:column;gap:8px;flex:1}.muted,small{color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0}.tags li{font-size:13px;background:var(--mist);padding:3px 10px;border-radius:99px}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.foot b{font-size:24px;font-family:Fraunces,serif}.total{display:block}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:40px;background:var(--mist);max-width:none}
+.feats div{max-width:280px}.feats h3{margin-bottom:6px;font-size:22px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);height:340px}.gallery img{width:100%;height:100%;object-fit:cover;display:block}
+footer{background:var(--ink);color:#c5d3d4;text-align:center;padding:36px 5%;font-size:14px}
+.modal{position:fixed;inset:0;background:#10262bb3;display:none;place-items:center;z-index:50;padding:16px}.modal.open{display:grid}
+.box{background:#fff;border-radius:12px;padding:28px;width:100%;max-width:480px;max-height:92vh;overflow:auto;position:relative;animation:pop .25s}
+@keyframes pop{from{opacity:0;transform:translateY(14px)}}
+@media(prefers-reduced-motion:reduce){.box{animation:none}}
+.x{position:absolute;right:14px;top:8px;background:0;border:0;font-size:28px;cursor:pointer;color:var(--ink)}
+form{display:grid;gap:12px;margin-top:14px}.two{display:flex;gap:12px}
+.sum{font-weight:700}.err{color:#b91c1c;font-size:14px}.ref{font:700 34px monospace;color:var(--sea);letter-spacing:.08em;margin:8px 0}
+.found{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px;margin-top:20px}
+.badge{padding:2px 10px;border-radius:99px;font-size:13px;background:#dcf2e4;color:#166534}.badge.cancelled{background:#fde2e2;color:#991b1b}
+@media(max-width:700px){nav a:not(.btn){display:none}.gallery{grid-template-columns:1fr;height:auto}.two{flex-direction:column}}

@@ -2,7 +2,6 @@ import logging
 
 from pathlib import Path
 
-from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from contextlib import asynccontextmanager
@@ -47,14 +46,13 @@ if settings.cors_origins_list:
 
 app.include_router(api_router, prefix="/api/v1")
 
-FRONTEND_DIR = Path(__file__).resolve().parents[1] / "frontend"
+BASE_DIR = Path(__file__).resolve().parents[1]
+FRONTEND_DIR = BASE_DIR / "frontend"   # staff panel  -> /app/
+WEBSITE_DIR = BASE_DIR / "website"     # guest website -> /
+
 if FRONTEND_DIR.exists():
     app.mount("/app", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
-
-@app.get("/", include_in_schema=False)
-def root():
-    return RedirectResponse("/app/")
 
 @app.get("/health")
 def health():
@@ -66,3 +64,6 @@ def health_db():
     with engine.connect() as conn:
         conn.execute(text("SELECT 1"))
     return {"database": "connected"}
+
+if WEBSITE_DIR.exists():
+    app.mount("/", StaticFiles(directory=WEBSITE_DIR, html=True), name="website")
