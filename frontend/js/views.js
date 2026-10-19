@@ -94,16 +94,18 @@ function addRoom(types, done) {
 Views.guests = {
   title: "Guests",
   async render(el, bar) {
+    let guests = [];
     el.innerHTML = `<div class="card"><div class="filters"><input id="q" placeholder="Search name, phone, ID number or email"></div><div id="tbl"></div></div>`;
     const load = async () => {
-      const guests = await API.get("/guests", { q: $("#q").value, limit: 100 });
-      $("#tbl").innerHTML = guests.length ? UI.table(["Name", "Phone", "ID", "Email"], guests.map(g =>
+      guests = await API.get("/guests", { q: $("#q").value, limit: 100 });
+      $("#tbl").innerHTML = guests.length ? UI.table(["Name", "Phone", "ID", "Email", ""], guests.map(g =>
         `<tr><td><b>${UI.esc(g.full_name)}</b></td><td>${UI.esc(g.phone)}</td>
-         <td>${UI.esc(g.id_type)}: ${UI.esc(g.id_number)}</td><td>${UI.esc(g.email || "-")}</td></tr>`).join("")) : UI.empty("No guests found");
+         <td>${g.id_number ? `${UI.esc(g.id_type)}: ${UI.esc(g.id_number)}` : `<span class="badge maintenance">ID missing</span>`}</td><td>${UI.esc(g.email || "-")}</td><td class="acts">${UI.can("admin", "receptionist") ? `<button class="btn ghost sm" data-edit="${g.id}">Edit</button>` : ""}</td></tr>`).join("")) : UI.empty("No guests found");
     };
     let timer;
     $("#q").oninput = () => { clearTimeout(timer); timer = setTimeout(() => UI.run(load), 300); };
     if (UI.can("admin", "receptionist")) bar.append(UI.button("+ Add guest", () => addGuest(load)));
+    el.onclick = e => { const b = e.target.closest("[data-edit]"); if (b) editGuest(guests.find(g => g.id == b.dataset.edit), load); };
     await load();
   },
 };
@@ -120,6 +122,26 @@ function addGuest(done) {
     m.querySelector("#f").onsubmit = e => {
       e.preventDefault();
       UI.run(async () => { await API.post("/guests", UI.data(e.target)); UI.closeModal(); UI.toast("Guest added"); done(); });
+    };
+  });
+}
+
+function editGuest(g, done) {
+  UI.modal("Edit guest", `<form id="f">
+    <label>Full name</label><input name="full_name" value="${UI.esc(g.full_name)}" required minlength="2">
+    <div class="row"><div><label>Phone</label><input name="phone" value="${UI.esc(g.phone)}" required></div>
+    <div><label>Email (optional)</label><input name="email" type="email" value="${UI.esc(g.email || "")}"></div></div>
+    <div class="row"><div><label>ID type</label><select name="id_type">${["CNIC", "Passport", "Other"].map(x => `<option ${x === g.id_type ? "selected" : ""}>${x}</option>`).join("")}</select></div>
+    <div><label>ID number</label><input name="id_number" value="${UI.esc(g.id_number || "")}" minlength="3"></div></div>
+    <label>Address (optional)</label><input name="address" value="${UI.esc(g.address || "")}">
+    <p class="hint">ID type and number are needed before check-in.</p>
+    <button class="btn full">Save guest</button></form>`, m => {
+    m.querySelector("#f").onsubmit = e => {
+      e.preventDefault();
+      const f = e.target;
+      const body = { full_name: f.full_name.value, phone: f.phone.value, email: f.email.value || null, address: f.address.value || null };
+      if (f.id_number.value) { body.id_type = f.id_type.value; body.id_number = f.id_number.value; }
+      UI.run(async () => { await API.patch("/guests/" + g.id, body); UI.closeModal(); UI.toast("Guest updated"); done(); });
     };
   });
 }
@@ -144,7 +166,7 @@ Views.bookings = {
           b.status === "checked_in" ? `<button class="btn ok sm" data-act="check-out" data-id="${b.id}">Check-out</button>` : "",
           b.status === "reserved" ? `<button class="btn bad sm" data-act="cancel" data-id="${b.id}">Cancel</button>` : "",
         ].join("");
-        return `<tr><td>${b.id}</td><td>${UI.esc(b.guest.full_name)}</td><td>${UI.esc(b.room.room_number)}</td>
+        return `<tr><td>${b.id}</td><td>${UI.esc(b.guest.full_name)}<br><small class="mut">${b.adults} adult(s)${b.children ? `, ${b.children} child(ren)` : ""}${b.special_requests ? ` · ${UI.esc(b.special_requests)}` : ""}</small></td><td>${UI.esc(b.room.room_number)}</td>
           <td>${b.check_in} → ${b.check_out}</td><td>${UI.money(b.total_amount)}</td><td>${UI.badge(b.status)}</td>
           <td class="acts">${acts}<button class="btn ghost sm" data-pay="${b.id}">Payments</button></td></tr>`;
       }).join("")) : UI.empty("No bookings found");
@@ -165,23 +187,29 @@ Views.bookings = {
 
 async function newBooking(done) {
   const guests = await API.get("/guests", { limit: 100 });
-  if (!guests.length) return UI.toast("Add a guest first", "bad");
   const t = UI.today();
   let rooms = [];
   UI.modal("New booking", `<form id="f">
+    <label>Guest</label>
+    <div class="row" style="grid-template-columns:1fr auto;align-items:center">
+      <select name="guest_id" required>${guests.map(g => `<option value="${g.id}">${UI.esc(g.full_name)} (${UI.esc(g.phone)})</option>`).join("") || `<option value="">No guests yet</option>`}</select>
+      <button type="button" class="btn ghost sm" id="ng">+ New guest</button></div>
     <div class="row"><div><label>Check-in</label><input type="date" name="check_in" min="${t}" value="${t}" required></div>
     <div><label>Check-out</label><input type="date" name="check_out" min="${UI.addDays(t, 1)}" value="${UI.addDays(t, 1)}" required></div></div>
     <button type="button" class="btn ghost full" id="find">Find available rooms</button>
     <label>Room</label><select name="room_id" required disabled><option value="">Find rooms first</option></select>
-    <label>Guest</label><select name="guest_id">${guests.map(g => `<option value="${g.id}">${UI.esc(g.full_name)} (${UI.esc(g.phone)})</option>`).join("")}</select>
+    <div class="row"><div><label>Adults</label><input name="adults" type="number" min="1" max="10" value="1" required></div>
+    <div><label>Children</label><input name="children" type="number" min="0" max="10" value="0"></div></div>
+    <label>Special requests (optional)</label><input name="special_requests" maxlength="500" placeholder="Late arrival, extra bed...">
     <div id="est" class="hint"></div>
     <button class="btn full">Create booking</button></form>`, m => {
     const f = m.querySelector("#f"), sel = f.room_id, est = m.querySelector("#est");
     const estimate = () => {
       const r = rooms.find(x => x.id == sel.value);
       const n = UI.nights(f.check_in.value, f.check_out.value);
-      est.textContent = r ? `${n} night(s) x ${UI.money(r.room_type.base_price)} = ${UI.money(n * r.room_type.base_price)}` : "";
+      est.textContent = r ? `${n} night(s) x ${UI.money(r.room_type.base_price)} = ${UI.money(n * r.room_type.base_price)} · sleeps ${r.room_type.capacity}` : "";
     };
+    m.querySelector("#ng").onclick = () => { UI.closeModal(); addGuest(() => newBooking(done)); };
     m.querySelector("#find").onclick = () => UI.run(async () => {
       rooms = await API.get("/rooms/available", { check_in: f.check_in.value, check_out: f.check_out.value });
       sel.disabled = !rooms.length;
@@ -193,7 +221,8 @@ async function newBooking(done) {
     f.onsubmit = e => {
       e.preventDefault();
       UI.run(async () => {
-        await API.post("/bookings", { guest_id: +f.guest_id.value, room_id: +sel.value, check_in: f.check_in.value, check_out: f.check_out.value });
+        await API.post("/bookings", { guest_id: +f.guest_id.value, room_id: +sel.value, check_in: f.check_in.value, check_out: f.check_out.value,
+          adults: +f.adults.value, children: +f.children.value || 0, special_requests: f.special_requests.value || null });
         UI.closeModal(); UI.toast("Booking created"); done();
       });
     };

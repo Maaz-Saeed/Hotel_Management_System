@@ -115,16 +115,26 @@ def create_online_booking(data: OnlineBookingIn, db: Session = Depends(get_db),
     rt = db.get(RoomType, data.room_type_id)
     if not rt:
         raise HTTPException(404, "Room type not found")
+    if data.adults + data.children > rt.capacity:
+        raise HTTPException(422, f"This room type sleeps at most {rt.capacity} guest(s)")
     nights = (data.check_out - data.check_in).days
     guest = db.scalar(select(Guest).where(func.lower(Guest.email) == customer.email))
     if not guest:
         guest = Guest(full_name=customer.full_name, email=customer.email, phone=customer.phone)
         db.add(guest)
         db.flush()
+    if data.id_number and not guest.id_number:
+        clash = db.scalar(select(Guest).where(Guest.id_type == data.id_type, Guest.id_number == data.id_number, Guest.id != guest.id))
+        if clash:
+            raise HTTPException(409, "This ID is already registered with another guest. Please contact reception.")
+        guest.id_type, guest.id_number = data.id_type, data.id_number
+    if data.address and not guest.address:
+        guest.address = data.address
     for room in find_available_rooms(db, data.check_in, data.check_out, rt.id):
         booking = Booking(
             guest_id=guest.id, room_id=room.id, created_by=None, source="online",
             check_in=data.check_in, check_out=data.check_out, status="reserved",
+            adults=data.adults, children=data.children, special_requests=data.special_requests,
             total_amount=rt.base_price * nights, reference="HMS-" + secrets.token_hex(3).upper(),
         )
         try:

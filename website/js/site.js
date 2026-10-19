@@ -124,7 +124,7 @@ function openBook(rt) {
   show(`<h3>Book ${esc(rt.name)}</h3><p class="muted">Booking as ${esc(me.full_name)} (${esc(me.email)})</p><form id="bf">
     <div class="two"><label>Check-in<input type="date" name="check_in" required min="${today}" value="${ci}"></label>
     <label>Check-out<input type="date" name="check_out" required value="${co}"></label></div>
-    <p class="sum" id="sum"></p><p class="err" id="err" role="alert"></p>
+    <div class="two"><label>Adults<input type="number" name="adults" min="1" max="${rt.capacity}" value="1" required></label><label>Children<input type="number" name="children" min="0" max="${rt.capacity}" value="0"></label></div><p class="muted">This room sleeps up to ${rt.capacity}.</p><label>Special requests (optional)<input name="special_requests" maxlength="500" placeholder="Late arrival, extra bed..."></label><details><summary>ID and address (optional, makes check-in faster)</summary><label>ID type<select name="id_type" style="padding:11px;border:1px solid var(--line);border-radius:8px"><option>CNIC</option><option>Passport</option><option>Other</option></select></label><label>ID number<input name="id_number" minlength="3" maxlength="50"></label><label>Address<input name="address" maxlength="255"></label></details><p class="sum" id="sum"></p><p class="err" id="err" role="alert"></p>
     <button class="btn full">Confirm booking</button></form>`);
   const f = $("#bf");
   const upd = () => { const n = nights(f.check_in.value, f.check_out.value); $("#sum").textContent = n > 0 ? `${n} night(s) × ${money(rt.base_price)} = ${money(n * rt.base_price)}. Pay at the hotel.` : ""; };
@@ -132,7 +132,10 @@ function openBook(rt) {
   f.onsubmit = async e => {
     e.preventDefault(); $("#err").textContent = "";
     try {
-      const d = await api("/bookings", { method: "POST", body: JSON.stringify({ room_type_id: rt.id, check_in: f.check_in.value, check_out: f.check_out.value }) });
+      const payload = { room_type_id: rt.id, check_in: f.check_in.value, check_out: f.check_out.value, adults: +f.adults.value, children: +f.children.value || 0, special_requests: f.special_requests.value || null };
+      if (f.id_number.value) { payload.id_type = f.id_type.value; payload.id_number = f.id_number.value; }
+      if (f.address.value) payload.address = f.address.value;
+      const d = await api("/bookings", { method: "POST", body: JSON.stringify(payload) });
       show(`<h3>Booking confirmed</h3><p>Your booking code is</p><div class="ref">${esc(d.reference)}</div>
         <p>${esc(d.room_type)} · ${esc(d.check_in)} to ${esc(d.check_out)}<br>Total ${money(d.total_amount)}, payable at the hotel.</p>
         <p class="muted">You can see or cancel it any time under My bookings.</p><button class="btn full" data-close>Done</button>`);

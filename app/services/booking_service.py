@@ -20,9 +20,7 @@ class BookingError(Exception):
         self.detail = detail
 
 
-def overlapping_booking_exists(
-    db: Session, room_id: int, check_in: date, check_out: date
-) -> bool:
+def overlapping_booking_exists(db: Session, room_id: int, check_in: date, check_out: date) -> bool:
     stmt = (
         select(Booking.id)
         .where(
@@ -70,6 +68,8 @@ def create_booking(db: Session, data: BookingCreate, user: User) -> Booking:
         raise BookingError(404, "Room not found")
     if room.status != "available":
         raise BookingError(409, "This room is under maintenance and cannot be booked")
+    if data.adults + data.children > room.room_type.capacity:
+        raise BookingError(422, f"This room sleeps at most {room.room_type.capacity} guest(s)")
 
     if overlapping_booking_exists(db, room.id, data.check_in, data.check_out):
         raise BookingError(409, "This room is already booked for these dates")
@@ -81,6 +81,9 @@ def create_booking(db: Session, data: BookingCreate, user: User) -> Booking:
         check_in=data.check_in,
         check_out=data.check_out,
         status="reserved",
+        adults=data.adults,
+        children=data.children,
+        special_requests=data.special_requests,
         total_amount=calculate_total(room, data.check_in, data.check_out),
     )
     db.add(booking)
@@ -91,6 +94,7 @@ def create_booking(db: Session, data: BookingCreate, user: User) -> Booking:
         raise BookingError(409, "This room is already booked for these dates")
     db.refresh(booking)
     return booking
+
 
 def _get_booking_or_404(db: Session, booking_id: int) -> Booking:
     booking = db.get(Booking, booking_id)
@@ -107,6 +111,9 @@ def check_in(db: Session, booking_id: int) -> Booking:
         )
     if date.today() < booking.check_in:
         raise BookingError(409, "Check-in is not allowed before the check-in date")
+    guest = booking.guest
+    if not (guest.id_type and guest.id_number):
+        raise BookingError(409, "Add the guest's ID type and ID number before check-in")
     booking.status = "checked_in"
     db.commit()
     db.refresh(booking)

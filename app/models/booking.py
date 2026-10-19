@@ -28,3 +28,7 @@ class Booking(Base):
     reference: Mapped[str | None] = mapped_column(String(12), unique=True, index=True)
     source: Mapped[str] = mapped_column(String(10), default="staff", server_default="staff")
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    
+    adults: Mapped[int] = mapped_column(default=1, server_default="1")
+    children: Mapped[int] = mapped_column(default=0, server_default="0")
+    special_requests: Mapped[str | None] = mapped_column(String(500))
