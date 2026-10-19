@@ -9,6 +9,7 @@ from app.api.v1.endpoints import (
     rooms,
     users,
     public,
+    password,
 )
 
 api_router = APIRouter()
@@ -21,3 +22,4 @@ api_router.include_router(bookings.router)
 api_router.include_router(payments.router)
 api_router.include_router(reports.router)
 api_router.include_router(public.router)
+api_router.include_router(password.router)

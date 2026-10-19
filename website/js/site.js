@@ -99,7 +99,8 @@ function openAuth(after, mode = "in") {
     <label>Phone<input name="phone" required pattern="\\+?[0-9\\- ]{7,20}" title="Digits, spaces and dashes only" autocomplete="tel" placeholder="0300-1234567"></label>` : ""}
     <label>Email<input type="email" name="email" required autocomplete="email"></label>
     <label>Password<input type="password" name="password" required ${up ? 'minlength="8" maxlength="72"' : ""} autocomplete="${up ? "new-password" : "current-password"}"></label>
-    <p class="err" id="aerr" role="alert"></p><button class="btn full">${up ? "Create account" : "Sign in"}</button></form>`);
+    <p class="err" id="aerr" role="alert"></p><button class="btn full">${up ? "Create account" : "Sign in"}</button></form>${up ? "" : `<p style="margin-top:14px"><a href="#" id="fg">Forgot your password?</a></p>`}`);
+  if (!up) $("#fg").onclick = e => { e.preventDefault(); openForgot(); };
   $("#sw").onclick = e => { e.preventDefault(); openAuth(after, up ? "in" : "up"); };
   $("#af").onsubmit = async e => {
     e.preventDefault();
@@ -171,5 +172,37 @@ $("#mf").onsubmit = async e => {
     load();
   };
 };
+function openForgot() {
+  show(`<h3>Reset your password</h3><p class="muted">Enter your account email. If it is registered, we send you a reset link.</p>
+    <form id="ff"><label>Email<input type="email" name="email" required autocomplete="email"></label>
+    <p class="err" id="ferr" role="alert"></p><button class="btn full">Send reset link</button></form>`);
+  $("#ff").onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const d = await api("/auth/forgot", { method: "POST", body: JSON.stringify({ email: e.target.email.value }) });
+      show(`<h3>Check your email</h3><p>${esc(d.message)}</p><button class="btn full" data-close>Close</button>`);
+    } catch (err) { $("#ferr").textContent = err.message; }
+  };
+}
+
+function openReset(token) {
+  show(`<h3>Set a new password</h3><form id="rf"><label>New password (min 8 characters)<input type="password" name="p1" required minlength="8" maxlength="72" autocomplete="new-password"></label>
+    <label>Repeat new password<input type="password" name="p2" required autocomplete="new-password"></label>
+    <p class="err" id="rerr" role="alert"></p><button class="btn full">Save password</button></form>`);
+  $("#rf").onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.p1.value !== f.p2.value) return $("#rerr").textContent = "Passwords do not match";
+    try {
+      const d = await api("/auth/reset", { method: "POST", body: JSON.stringify({ token, new_password: f.p1.value }) });
+      show(`<h3>Done</h3><p>${esc(d.message)}</p><button class="btn full" id="gi">Sign in</button>`);
+      $("#gi").onclick = () => openAuth();
+    } catch (err) { $("#rerr").textContent = err.message; }
+  };
+}
+
+const resetToken = new URLSearchParams(location.search).get("reset");
+if (resetToken) { history.replaceState(null, "", location.pathname); openReset(resetToken); }
+
 (async () => { if (tok()) { try { me = await api("/auth/me"); } catch (_) {} } renderAcct(); })();
 load();

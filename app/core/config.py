@@ -8,6 +8,12 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ENVIRONMENT: str = "development"
     CORS_ORIGINS: str = ""
+    PUBLIC_BASE_URL: str = "http://localhost:8000"  # used inside password reset links
+    SMTP_HOST: str = ""  # leave empty in development: the reset link is printed in the terminal
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

@@ -68,25 +68,23 @@ Views.staff = {
 function staffForm(u, done) {
   const roles = ["receptionist", "manager", "admin"];
   const opts = r => roles.map(x => `<option ${x === r ? "selected" : ""}>${x}</option>`).join("");
+  const v = u || { full_name: "", email: "", role: "receptionist", is_active: true };
   UI.modal(u ? "Edit staff member" : "Add staff member", `<form id="f">
-    ${u ? `<p class="mut">${UI.esc(u.full_name)} · ${UI.esc(u.email)}</p>` : `
-    <label>Full name</label><input name="full_name" required minlength="2">
-    <label>Email</label><input name="email" type="email" required>`}
-    <label>${u ? "New password (leave empty to keep)" : "Password (min 8 characters)"}</label><input name="password" type="password" minlength="8" ${u ? "" : "required"}>
-    <div class="row"><div><label>Role</label><select name="role">${opts(u ? u.role : "receptionist")}</select></div>
-    ${u ? `<div><label>Status</label><select name="active"><option value="1" ${u.is_active ? "selected" : ""}>Active</option><option value="0" ${u.is_active ? "" : "selected"}>Inactive</option></select></div>` : ""}</div>
+    <label>Full name</label><input name="full_name" value="${UI.esc(v.full_name)}" required minlength="2" maxlength="100">
+    <label>Email</label><input name="email" type="email" value="${UI.esc(v.email)}" required>
+    <label>${u ? "New password (leave empty to keep the current one)" : "Password (min 8 characters)"}</label>
+    <input name="password" type="password" minlength="8" maxlength="72" autocomplete="new-password" ${u ? "" : "required"}>
+    <div class="row"><div><label>Role</label><select name="role">${opts(v.role)}</select></div>
+    ${u ? `<div><label>Status</label><select name="active"><option value="1" ${v.is_active ? "selected" : ""}>Active</option><option value="0" ${v.is_active ? "" : "selected"}>Inactive</option></select></div>` : ""}</div>
     <button class="btn full">Save</button></form>`, m => {
     m.querySelector("#f").onsubmit = e => {
       e.preventDefault();
       const f = e.target;
+      const body = { full_name: f.full_name.value, email: f.email.value, role: f.role.value };
+      if (f.password.value) body.password = f.password.value;
       UI.run(async () => {
-        if (u) {
-          const body = { role: f.role.value, is_active: f.active.value === "1" };
-          if (f.password.value) body.password = f.password.value;
-          await API.patch("/users/" + u.id, body);
-        } else {
-          await API.post("/users", { full_name: f.full_name.value, email: f.email.value, password: f.password.value, role: f.role.value });
-        }
+        if (u) { body.is_active = f.active.value === "1"; await API.patch("/users/" + u.id, body); }
+        else await API.post("/users", body);
         UI.closeModal(); UI.toast("Staff member saved"); done();
       });
     };
